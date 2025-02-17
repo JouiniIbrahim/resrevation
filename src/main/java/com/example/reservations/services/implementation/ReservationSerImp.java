@@ -21,13 +21,13 @@ public class ReservationSerImp implements ReservationService {
     private ReservationRepo reservationRepo;
 
     @Autowired
-    private ReservationMapper reservationMapper;  // Injection de ReservationMapper
+    private ReservationMapper reservationMapper;
 
     @Override
     public ReservationDto create(ReservationDto reservationDto) {
-        Reservation reservation = reservationMapper.ToEntity(reservationDto);  // Appel via l'instance injectée
+        Reservation reservation = reservationMapper.ToEntity(reservationDto);
         reservationRepo.save(reservation);
-        return reservationMapper.ToDTO(reservation);  // Appel via l'instance injectée
+        return reservationMapper.ToDTO(reservation);
     }
 
     @Override
@@ -37,24 +37,27 @@ public class ReservationSerImp implements ReservationService {
                 .collect(Collectors.toList());
     }
 
-    // Nouvelle méthode pour récupérer les réservations par statut et période
-    public List<ReservationDto> findReservationsByStatutAndPeriod(String statut, LocalDate startDate, LocalDate endDate) {
+    //  récupérer les réservations par statut et période
+    @Override
+    public List<ReservationDto> findReservations(String statut, LocalDate startDate, LocalDate endDate) {
         return reservationRepo.findReservationsByStatutAndPeriod(statut, startDate, endDate)
                 .stream()
-                .map(reservationMapper::ToDTO)  // Appel via l'instance injectée
+                .map(reservationMapper::ToDTO)
                 .collect(Collectors.toList());
     }
 
-    // Nouvelle méthode pour calculer le revenu total par statut et période
-    public Double calculateTotalRevenueByStatutAndPeriod(String statut, LocalDate startDate, LocalDate endDate) {
-        return reservationRepo.calculateTotalRevenueByStatutAndPeriod(statut, startDate, endDate);
+    //  calculer le revenu total par statut et période
+    @Override
+    public Double TotalRevenue(String statut, LocalDate startDate, LocalDate endDate) {
+        return reservationRepo.TotalRevenue(statut, startDate, endDate);
     }
 
-    // Nouvelle méthode pour trouver les clients ayant réservé plus de X fois dans une année
+    //  trouver les clients ayant réservé plus de X fois dans une année
+    @Override
     public List<ClientDto> ReservationsMore(int year, int x) {
         return reservationRepo.ReservationsMore(year, x)
                 .stream()
-                .map(ClientMapper::ToDTO)  // Appel via l'instance injectée de ClientMapper
+                .map(ClientMapper::ToDTO)  //
                 .collect(Collectors.toList());
     }
 }

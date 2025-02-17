@@ -9,7 +9,6 @@ public interface StatutReservationService {
 
     public List<StatutReservationDto> getAllStatutReservations();
 
-
     public StatutReservationDto saveStatutReservation(StatutReservationDto statutReservation);
 
 }

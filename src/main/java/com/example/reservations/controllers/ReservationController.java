@@ -30,16 +30,27 @@ public class ReservationController {
     public List<ReservationDto> findReservationsByStatutAndPeriod(
             @RequestParam String statut,
             @RequestParam LocalDate startDate,
-            @RequestParam LocalDate endDate) {
-        return reservationSerImp.findReservationsByStatutAndPeriod(statut, startDate, endDate);
+            @RequestParam LocalDate endDate
+//    @RequestBody ReservationDto reservationDto
+    ){
+        return reservationSerImp.findReservations(statut,startDate ,endDate );
     }
+    /*@GetMapping("/statut-period")
+    public List<ReservationDto> findReservationsByStatutAndPeriod(
+            @RequestParam String statut,
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate
+//    @RequestBody ReservationDto reservationDto
+    ){
+        return reservationSerImp.findReservations(reservationDto.getStatut().getLibelle(),reservationDto.getDateDebut() ,reservationDto.getDateFin() );
+    }*/
 
     @GetMapping("/total")
     public Double calculateTotalRevenueByStatutAndPeriod(
             @RequestParam String statut,
             @RequestParam LocalDate startDate,
             @RequestParam LocalDate endDate) {
-        return reservationSerImp.calculateTotalRevenueByStatutAndPeriod(statut, startDate, endDate);
+        return reservationSerImp.TotalRevenue(statut, startDate, endDate);
     }
 
     @GetMapping("/reservations-more")

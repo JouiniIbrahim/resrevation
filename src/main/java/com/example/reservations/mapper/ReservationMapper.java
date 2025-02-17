@@ -10,14 +10,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class ReservationMapper {
 
-    // Retirer 'static' pour permettre l'injection via Spring
     @Autowired
     private StatutReservationRepo statutReservationRepo;
 
     @Autowired
     private ClientRepo clientRepo;
 
-    // La méthode 'ToDTO' n'est plus statique
     public ReservationDto ToDTO(Reservation reservation) {
         if (reservation == null) {
             return null;
@@ -29,11 +27,13 @@ public class ReservationMapper {
         reservationDto.setPrixTotal(reservation.getPrixTotal());
         reservationDto.setClient(ClientMapper.ToDTO(reservation.getClient()));
         reservationDto.setStatut(StatutReservationMapper.ToDTO(reservation.getStatut()));
+        reservationDto.setStatutId(reservation.getStatut().getId());
+        reservationDto.setClientid(reservation.getClient().getId());
 
         return reservationDto;
     }
 
-    // La méthode 'ToEntity' n'est plus statique
+
     public Reservation ToEntity(ReservationDto reservationDto) {
         if (reservationDto == null) {
             return null;
@@ -45,9 +45,9 @@ public class ReservationMapper {
 
         // Utilisation des repositories injectés pour récupérer le statut et le client
         reservation.setStatut(statutReservationRepo.findById(reservationDto.getStatutId())
-                .orElseThrow(() -> new RuntimeException("Statut non trouvé")));  // Ajouter gestion d'erreur si nécessaire
+                .orElseThrow(() -> new RuntimeException("Statut non trouvé")));
         reservation.setClient(clientRepo.findById(reservationDto.getClientid())
-                .orElseThrow(() -> new RuntimeException("Client non trouvé")));  // Ajouter gestion d'erreur si nécessaire
+                .orElseThrow(() -> new RuntimeException("Client non trouvé")));
 
         return reservation;
     }

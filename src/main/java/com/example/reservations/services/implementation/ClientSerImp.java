@@ -2,6 +2,7 @@ package com.example.reservations.services.implementation;
 
 import com.example.reservations.domain.Client;
 import com.example.reservations.dto.ClientDto;
+import com.example.reservations.dto.ResponseClientDto;
 import com.example.reservations.mapper.ClientMapper;
 import com.example.reservations.repositories.ClientRepo;
 import com.example.reservations.services.ClientService;
@@ -32,14 +33,14 @@ public class ClientSerImp implements ClientService {
         clientRepo.save(existingClient);
         return ClientMapper.ToDTO(existingClient);
     }
-    // Nouvelle méthode pour trouver un client par email
+    //  trouver un client par email
     @Override
-    public ClientDto findByEmail(String email) {
-        Client client = clientRepo.findByEmail(email);
+    public ResponseClientDto findByEmail(String email) {
+        ResponseClientDto client = clientRepo.findByEmail(email);
         if (client == null) {
             throw new RuntimeException("Client non trouvé avec l'email : " + email);
         }
-        return ClientMapper.ToDTO(client);
+        return client;
     }
 
     @Override
@@ -47,12 +48,14 @@ public class ClientSerImp implements ClientService {
         return clientRepo.findAll().stream().map(ClientMapper::ToDTO).collect(Collectors.toList());
     }
 
-    // Nouvelle méthode pour trouver les clients inscrits après une date donnée
+    // trouver les clients inscrits après une date donnée
+    @Override
     public List<ClientDto> getClientsInscritsApresDate(LocalDateTime date) {
         return clientRepo.findByDateInscriptionAfter(date).stream().map(ClientMapper::ToDTO).collect(Collectors.toList());
     }
 
-    // Nouvelle méthode pour trouver les clients ayant effectué au moins une réservation
+    // trouver les clients ayant effectué au moins une réservation
+    @Override
     public List<ClientDto> getClientsAvecReservations() {
         return clientRepo.findClientsWithReservations().stream().map(ClientMapper::ToDTO).collect(Collectors.toList());
     }

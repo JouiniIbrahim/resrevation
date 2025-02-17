@@ -1,6 +1,7 @@
 package com.example.reservations.repositories;
 
 import com.example.reservations.domain.Client;
+import com.example.reservations.dto.ResponseClientDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,14 +12,14 @@ import java.util.List;
 
 @Repository
 public interface ClientRepo extends JpaRepository<Client, Long> {
+    //Trouver un client par email.
+    @Query(value = "SELECT * FROM reservation.client c WHERE c.email = :email", nativeQuery = true)
+    ResponseClientDto findByEmail(@Param("email") String email);
 
-    @Query(value = "SELECT * FROM client WHERE email = :email", nativeQuery = true)
-    Client findByEmail(@Param("email") String email);
-
-    // Récupérer la liste des clients inscrits après une date donnée
+    // Récupérer la liste des clients inscrits après une date donnée.
     List<Client> findByDateInscriptionAfter(LocalDateTime date);
 
-    // Récupérer la liste des clients ayant effectué au moins une réservation
+    //Récupérer la liste des clients ayant effectué au moins une réservation
     @Query("SELECT DISTINCT c FROM Client c JOIN c.reservations r")
     List<Client> findClientsWithReservations();
 }

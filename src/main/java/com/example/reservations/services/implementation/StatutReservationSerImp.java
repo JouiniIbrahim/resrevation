@@ -35,6 +35,7 @@ public class StatutReservationSerImp implements StatutReservationService {
         return null;
     }
 
+    @Override
     public List<StatutReservationDto> getAllStatutReservations() {
         return statutReservationRepo.findAll().stream().map(StatutReservationMapper::ToDTO)
                 .collect(Collectors.toList());

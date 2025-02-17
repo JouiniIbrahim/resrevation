@@ -32,7 +32,7 @@ public class Client {
 
     // Relation OneToMany avec Reservation
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Reservation> reservations; // Assurez-vous que cet attribut existe
+    private List<Reservation> reservations;
 
 
     public LocalDateTime getDateInscription() {

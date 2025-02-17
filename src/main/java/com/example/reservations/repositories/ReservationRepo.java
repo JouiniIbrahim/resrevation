@@ -13,7 +13,7 @@ import java.util.List;
 @Repository
 public interface ReservationRepo extends JpaRepository<Reservation, Long> {
 
-    // Récupérer toutes les réservations ayant un statut donné pour une période donnée
+    //Récupérer toutes les réservations ayant un statut donné pour une périod donnée.
     @Query("SELECT r FROM Reservation r WHERE r.statut.libelle = :statut AND r.dateDebut >= :startDate AND r.dateFin <= :endDate")
     List<Reservation> findReservationsByStatutAndPeriod(
             @Param("statut") String statut,
@@ -21,9 +21,9 @@ public interface ReservationRepo extends JpaRepository<Reservation, Long> {
             @Param("endDate") LocalDate endDate
     );
 
-    // Calculer le revenu total des réservations ayant un statut spécifique pour une période donnée
+    // Calculer le revenu total des réservations ayant un statut spécifique pour une période donnée.
     @Query("SELECT SUM(r.prixTotal) FROM Reservation r WHERE r.statut.libelle = :statut AND r.dateDebut >= :startDate AND r.dateFin <= :endDate")
-    Double calculateTotalRevenueByStatutAndPeriod(
+    Double TotalRevenue(
             @Param("statut") String statut,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate

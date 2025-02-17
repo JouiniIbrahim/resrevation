@@ -1,6 +1,7 @@
 package com.example.reservations.controllers;
 
 import com.example.reservations.dto.ClientDto;
+import com.example.reservations.dto.ResponseClientDto;
 import com.example.reservations.services.implementation.ClientSerImp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +27,7 @@ public class ClientController {
     }
 
     @GetMapping("/byEmail")
-    public ClientDto getClientByEmail(@RequestParam String email) {
+    public  ResponseClientDto getClientByEmail(@RequestParam String email) {
         return clientSerImp.findByEmail(email);
     }
 

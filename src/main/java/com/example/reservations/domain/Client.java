@@ -6,6 +6,7 @@ import lombok.*;
 
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 
@@ -28,6 +29,11 @@ public class Client {
     private String telephone;
 
     private LocalDateTime dateInscription;
+
+    // Relation OneToMany avec Reservation
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Reservation> reservations; // Assurez-vous que cet attribut existe
+
 
     public LocalDateTime getDateInscription() {
         return dateInscription;
@@ -75,6 +81,14 @@ public class Client {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public List<Reservation> getReservations() {
+        return reservations;
+    }
+
+    public void setReservations(List<Reservation> reservations) {
+        this.reservations = reservations;
     }
 }
 

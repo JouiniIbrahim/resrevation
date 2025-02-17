@@ -5,12 +5,10 @@ import com.example.reservations.dto.ClientDto;
 import java.util.List;
 
 public interface ClientService {
-
-    public ClientDto addClient(ClientDto clientDto);
-
-    public ClientDto updateClient(ClientDto clientDto);
-
-    public List<ClientDto> getAllClients();
+    ClientDto addClient(ClientDto clientDto);
+    ClientDto updateClient(ClientDto clientDto);
+    List<ClientDto> getAllClients();
+    ClientDto findByEmail(String email);
 
 
 

@@ -12,7 +12,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/status")
+@RequestMapping("/statut")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class StatutReservationController {
 

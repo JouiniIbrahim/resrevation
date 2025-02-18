@@ -1,7 +1,8 @@
 package com.example.reservations.repositories;
 
 import com.example.reservations.domain.Client;
-import com.example.reservations.dto.ResponseClientDto;
+import com.example.reservations.dto.ClientDto;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -9,17 +10,45 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ClientRepo extends JpaRepository<Client, Long> {
-    //Trouver un client par email.
-    @Query(value = "SELECT * FROM reservation.client c WHERE c.email = :email", nativeQuery = true)
-    ResponseClientDto findByEmail(@Param("email") String email);
+    /**
+     * Find a client by email, returning a ClientDto wrapped in an Optional.
+     *
+     * @param email The email of the client to find.
+     * @return An Optional containing the ClientDto if found, or empty if not.
+     */
 
-    // Récupérer la liste des clients inscrits après une date donnée.
-    List<Client> findByDateInscriptionAfter(LocalDateTime date);
+    @Query("SELECT new com.example.reservations.dto.ClientDto(c.id, c.nom, c.prenom, c.email, c.telephone, c.dateInscription) " +
+            "FROM Client c WHERE c.email = :email")
+    Optional<ClientDto> findByEmail(@Param("email") String email);
 
-    //Récupérer la liste des clients ayant effectué au moins une réservation
+    /**
+     * Find clients who registered after a specified date.
+     *
+     * @param date The date to compare the client's registration date.
+     * @return A list of Client objects who registered after the given date.
+     */
+    List<ClientDto> findByDateInscriptionAfter(LocalDateTime date);
+
+    /**
+     * Find all clients who have made at least one reservation.
+     *
+     * @return A list of Client objects who have at least one reservation.
+     */
     @Query("SELECT DISTINCT c FROM Client c JOIN c.reservations r")
-    List<Client> findClientsWithReservations();
+    List<ClientDto> findClientsWithReservations();
+
+    /**
+     * Find all clients, returning a list of ClientDto objects.
+     *
+     * @return A list of ClientDto objects representing all clients.
+     */
+    @Query("SELECT new com.example.reservations.dto.ClientDto(c.id, c.nom, c.prenom, c.email, c.telephone, c.dateInscription) FROM Client c")
+    List<ClientDto> findAllClients();
+
 }
+
+

@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,30 +35,51 @@ public class ClientSerImp implements ClientService {
         clientRepo.save(existingClient);
         return ClientMapper.ToDTO(existingClient);
     }
-    //  trouver un client par email
-    @Override
-    public ResponseClientDto findByEmail(String email) {
-        ResponseClientDto client = clientRepo.findByEmail(email);
-        if (client == null) {
-            throw new RuntimeException("Client non trouvé avec l'email : " + email);
-        }
-        return client;
-    }
 
+    /**
+     * Retrieve all clients as ClientDto objects.
+     *
+     * @return List of ClientDto representing all clients.
+     */
     @Override
     public List<ClientDto> getAllClients() {
-        return clientRepo.findAll().stream().map(ClientMapper::ToDTO).collect(Collectors.toList());
+        return clientRepo.findAllClients();  // Directly use the custom query in the repository
     }
 
-    // trouver les clients inscrits après une date donnée
+    /**
+     * Retrieve all clients who registered after a given date.
+     *
+     * @param date The date to filter client registrations.
+     * @return List of ClientDto representing the clients who registered after the given date.
+     */
     @Override
     public List<ClientDto> getClientsInscritsApresDate(LocalDateTime date) {
-        return clientRepo.findByDateInscriptionAfter(date).stream().map(ClientMapper::ToDTO).collect(Collectors.toList());
+
+        List<ClientDto> clients = clientRepo.findByDateInscriptionAfter(date);
+
+        return clients;
     }
 
-    // trouver les clients ayant effectué au moins une réservation
+    /**
+     * Retrieve all clients who have made at least one reservation.
+     *
+     * @return List of ClientDto representing the clients who have made at least one reservation.
+     */
     @Override
     public List<ClientDto> getClientsAvecReservations() {
-        return clientRepo.findClientsWithReservations().stream().map(ClientMapper::ToDTO).collect(Collectors.toList());
+        // Fetch the clients from the repository
+        List<ClientDto> clients = clientRepo.findClientsWithReservations();
+        return clients;
+    }
+
+    /**
+     * Find a client by email.
+     *
+     * @param email The email of the client to find.
+     * @return An Optional containing ClientDto if found, or empty if no client is found.
+     */
+    @Override
+    public Optional<ClientDto> findByEmail(String email) {
+        return clientRepo.findByEmail(email);
     }
 }

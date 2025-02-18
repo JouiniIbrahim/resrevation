@@ -12,7 +12,7 @@ public class ClientMapper {
             return null;
         }
         ClientDto clientDto = new ClientDto();
-        clientDto.setId(client.getId());
+        clientDto   .setId(client.getId());
         clientDto.setNom(client.getNom());
         clientDto.setPrenom(client.getPrenom());
         clientDto.setEmail(client.getEmail());

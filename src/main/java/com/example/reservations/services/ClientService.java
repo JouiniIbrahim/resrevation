@@ -5,6 +5,7 @@ import com.example.reservations.dto.ResponseClientDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface ClientService {
     ClientDto addClient(ClientDto clientDto);
@@ -14,7 +15,7 @@ public interface ClientService {
     List<ClientDto> getAllClients();
 
     //ClientDto findByEmail(String email);
-    ResponseClientDto findByEmail(String email);
+    Optional<ClientDto> findByEmail(String email);
 
     public List<ClientDto> getClientsInscritsApresDate(LocalDateTime date);
 

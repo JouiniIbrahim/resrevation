@@ -1,8 +1,10 @@
 package com.example.reservations.services.implementation;
 
+import com.example.reservations.domain.Client;
 import com.example.reservations.domain.Reservation;
 import com.example.reservations.dto.ClientDto;
 import com.example.reservations.dto.ReservationDto;
+import com.example.reservations.dto.ReservationResponseDto;
 import com.example.reservations.mapper.ClientMapper;
 import com.example.reservations.mapper.ReservationMapper;
 import com.example.reservations.repositories.ReservationRepo;
@@ -31,33 +33,27 @@ public class ReservationSerImp implements ReservationService {
     }
 
     @Override
-    public List<ReservationDto> findAll() {
-        return reservationRepo.findAll().stream()
-                .map(reservationMapper::ToDTO)  // Appel via l'instance injectée
-                .collect(Collectors.toList());
+    public List<ReservationResponseDto> findAll() {
+        return reservationRepo.allReservations();
     }
 
     //  récupérer les réservations par statut et période
     @Override
-    public List<ReservationDto> findReservations(String statut, LocalDate startDate, LocalDate endDate) {
-        return reservationRepo.findReservationsByStatutAndPeriod(statut, startDate, endDate)
-                .stream()
-                .map(reservationMapper::ToDTO)
-                .collect(Collectors.toList());
+    public List<ReservationResponseDto> findReservations(Long statutId, LocalDate startDate, LocalDate endDate) {
+        return reservationRepo.findReservationsByStatutAndPeriod(statutId, startDate, endDate);
+
     }
 
     //  calculer le revenu total par statut et période
     @Override
-    public Double TotalRevenue(String statut, LocalDate startDate, LocalDate endDate) {
-        return reservationRepo.TotalRevenue(statut, startDate, endDate);
+    public Double TotalRevenue(Long statutId, LocalDate startDate, LocalDate endDate) {
+        return reservationRepo.TotalRevenue(statutId, startDate, endDate);
     }
 
     //  trouver les clients ayant réservé plus de X fois dans une année
     @Override
-    public List<ClientDto> ReservationsMore(int year, int x) {
-        return reservationRepo.ReservationsMore(year, x)
-                .stream()
-                .map(ClientMapper::ToDTO)  //
-                .collect(Collectors.toList());
+    public List<Client> ReservationsMore(int year, int x) {
+        return reservationRepo.ReservationsMore(year, x);
+
     }
 }

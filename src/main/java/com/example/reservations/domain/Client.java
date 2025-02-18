@@ -1,5 +1,6 @@
 package com.example.reservations.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.*;
@@ -83,6 +84,8 @@ public class Client {
         this.id = id;
     }
 
+
+    @JsonIgnore
     public List<Reservation> getReservations() {
         return reservations;
     }

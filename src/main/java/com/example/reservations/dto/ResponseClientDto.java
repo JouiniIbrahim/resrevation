@@ -5,16 +5,16 @@ import java.time.LocalDateTime;
 
 public interface ResponseClientDto {
 
-     Long getId();
+    Long getId();
 
-     String getNom();
+    String getNom();
 
-     String getPrenom();
+    String getPrenom();
 
-     String getEmail();
+    String getEmail();
 
-     String getTelephone();
+    String getTelephone();
 
-     LocalDateTime getDateInscription();
+    LocalDateTime getDateInscription();
 
 }

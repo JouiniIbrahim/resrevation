@@ -2,7 +2,6 @@ package com.example.reservations.services.implementation;
 
 import com.example.reservations.domain.Client;
 import com.example.reservations.dto.ClientDto;
-import com.example.reservations.dto.ResponseClientDto;
 import com.example.reservations.mapper.ClientMapper;
 import com.example.reservations.repositories.ClientRepo;
 import com.example.reservations.services.ClientService;
@@ -10,10 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class ClientSerImp implements ClientService {
@@ -53,9 +50,9 @@ public class ClientSerImp implements ClientService {
      * @return List of ClientDto representing the clients who registered after the given date.
      */
     @Override
-    public List<ClientDto> getClientsInscritsApresDate(LocalDateTime date) {
+    public List<Client> getClientsInscritsApresDate(LocalDateTime date) {
 
-        List<ClientDto> clients = clientRepo.findByDateInscriptionAfter(date);
+        List<Client> clients = clientRepo.findByDateInscriptionAfter(date);
 
         return clients;
     }
@@ -66,9 +63,9 @@ public class ClientSerImp implements ClientService {
      * @return List of ClientDto representing the clients who have made at least one reservation.
      */
     @Override
-    public List<ClientDto> getClientsAvecReservations() {
+    public List<Client> getClientsAvecReservations() {
         // Fetch the clients from the repository
-        List<ClientDto> clients = clientRepo.findClientsWithReservations();
+        List<Client> clients = clientRepo.findClientsWithReservations();
         return clients;
     }
 

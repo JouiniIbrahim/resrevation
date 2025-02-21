@@ -8,20 +8,19 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 
-
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class ClientDto {
 
-        private Long id;
-        private String nom;
-        private String prenom;
-        private String email;
-        private String telephone;
-        private LocalDateTime dateInscription;
+    private Long id;
+    private String nom;
+    private String prenom;
+    private String email;
+    private String telephone;
+    private LocalDateTime dateInscription;
+    private String messageFr;
 
        /* public Long getId() {
                 return id;

@@ -2,18 +2,16 @@ package com.example.reservations.domain;
 
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
 @Entity
-
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Reservation {
+public class Reservation implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,6 +23,8 @@ public class Reservation {
 
     private Double prixTotal;
 
+    private String processInstId;
+
     @ManyToOne
     @JoinColumn(name = "statut_id", nullable = false)
     private StatutReservation statut;
@@ -32,53 +32,19 @@ public class Reservation {
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
+    private String messageFr;
 
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public LocalDate getDateDebut() {
-        return dateDebut;
-    }
-
-    public void setDateDebut(LocalDate dateDebut) {
-        this.dateDebut = dateDebut;
-    }
-
-    public LocalDate getDateFin() {
-        return dateFin;
-    }
-
-    public void setDateFin(LocalDate dateFin) {
-        this.dateFin = dateFin;
-    }
-
-    public Double getPrixTotal() {
-        return prixTotal;
-    }
-
-    public void setPrixTotal(Double prixTotal) {
-        this.prixTotal = prixTotal;
-    }
-
-    public StatutReservation getStatut() {
-        return statut;
-    }
-
-    public void setStatut(StatutReservation statut) {
-        this.statut = statut;
-    }
-
-    public Client getClient() {
-        return client;
-    }
-
-    public void setClient(Client client) {
-        this.client = client;
+    @Override
+    public String toString() {
+        return "Reservation{" +
+                "id=" + id +
+                ", dateDebut=" + dateDebut +
+                ", dateFin=" + dateFin +
+                ", prixTotal=" + prixTotal +
+                ", processInstId='" + processInstId + '\'' +
+                ", statut=" + statut +
+                ", client=" + client +
+                ", messageFr='" + messageFr + '\'' +
+                '}';
     }
 }

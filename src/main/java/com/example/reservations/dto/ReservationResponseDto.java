@@ -21,5 +21,6 @@ public class ReservationResponseDto {
     private Long statutId;
     // @JsonIgnore
     private Long clientid;
+    private String messageFr;
 
 }

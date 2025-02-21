@@ -8,10 +8,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Response {
+public class TaskApprovalDTO {
 
-    private Object data;
-    private String message;
-
-
+    private String taskId;
+    private String processInstanceId;
+    private Boolean approved;
 }

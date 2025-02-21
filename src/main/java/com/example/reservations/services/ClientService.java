@@ -1,7 +1,7 @@
 package com.example.reservations.services;
 
+import com.example.reservations.domain.Client;
 import com.example.reservations.dto.ClientDto;
-import com.example.reservations.dto.ResponseClientDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,9 +17,9 @@ public interface ClientService {
     //ClientDto findByEmail(String email);
     Optional<ClientDto> findByEmail(String email);
 
-    public List<ClientDto> getClientsInscritsApresDate(LocalDateTime date);
+    public List<Client> getClientsInscritsApresDate(LocalDateTime date);
 
-    public List<ClientDto> getClientsAvecReservations();
+    public List<Client> getClientsAvecReservations();
 
 
 }

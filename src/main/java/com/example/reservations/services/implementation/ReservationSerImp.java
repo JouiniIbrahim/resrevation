@@ -6,12 +6,13 @@ import com.example.reservations.domain.StatutReservation;
 import com.example.reservations.dto.ReservationDto;
 import com.example.reservations.dto.ReservationResponseDto;
 import com.example.reservations.dto.TaskApprovalDTO;
-import com.example.reservations.dto.TaskDTO;
 import com.example.reservations.mapper.ReservationMapper;
 import com.example.reservations.repositories.ReservationRepo;
 import com.example.reservations.repositories.StatutReservationRepo;
 import com.example.reservations.services.ReservationService;
-import jakarta.transaction.Transactional;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.TaskService;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
@@ -19,27 +20,31 @@ import org.camunda.bpm.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
+@RequiredArgsConstructor
 @Service
 public class ReservationSerImp implements ReservationService {
 
-    @Autowired
-    private ReservationRepo reservationRepo;
-    @Autowired
-    private ReservationMapper reservationMapper;
-    @Autowired
-    private StatutReservationRepo statutReservationRepo;
-    @Autowired
-    private  RuntimeService runtimeService;
-    @Autowired
-    private  TaskService taskService;
+
+    private final ReservationRepo reservationRepo;
+
+    private final ReservationMapper reservationMapper;
+
+    private final StatutReservationRepo statutReservationRepo;
+
+    private final RuntimeService runtimeService;
+
+    private final TaskService taskService;
+
+    private JavaMailSender mailSender;
 
     /**
      * Create a new reservation from the provided reservation DTO.
@@ -59,7 +64,8 @@ public class ReservationSerImp implements ReservationService {
         // Map the saved entity back to a DTO and return it
         return reservationMapper.ToDTO(reservation);
     }
-    public Reservation lancheProcess(Reservation reservation){
+
+    public Reservation lancheProcess(Reservation reservation) {
         System.out.println("************************************************");
 
         // Preparing variables for the Camunda process
@@ -72,7 +78,7 @@ public class ReservationSerImp implements ReservationService {
         variables.put("type", "Reservation");
 
         // Start the process instance
-        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("Process_1qriv8k", variables);
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("reservation-diagramV2", variables);
         reservation.setProcessInstId(processInstance.getProcessInstanceId());
         reservation = reservationRepo.save(reservation);
         return reservation;
@@ -130,68 +136,148 @@ public class ReservationSerImp implements ReservationService {
         return reservationRepo.ReservationsMore(year, x);
     }
 
-    /**
-     * Approve or disapprove a task based on the approval status provided in the DTO.
-     *
-     * @param taskApprovalDTO The DTO containing task details and approval status.
-     * @return A response indicating the success or failure of the operation.
-     */
+//    /**
+//     * Approve or disapprove a task based on the approval status provided in the DTO.
+//     *
+//     * @param taskApprovalDTO The DTO containing task details and approval status.
+//     * @return A response indicating the success or failure of the operation.
+//     */
+//    public ResponseEntity<String> approveOrDisapproveTask(TaskApprovalDTO taskApprovalDTO) {
+//        // Extract task details from DTO
+//        String taskId = taskApprovalDTO.getTaskId();
+//        String processInstanceId = taskApprovalDTO.getProcessInstanceId();
+//        Boolean approved = taskApprovalDTO.getApproved();
+//
+//        System.out.println("Trying to approve/disapprove task with ID: " + taskId);
+//
+//        // Query the task by taskId and processInstanceId
+//        Task task = taskService.createTaskQuery()
+//                .taskId(taskId)
+//                .processInstanceId(processInstanceId)
+//                .singleResult();
+//
+//        // Check if task is found
+//        if (task != null) {
+//            // Prepare task completion variables
+//            Map<String, Object> variables = new HashMap<>();
+//            variables.put("statut", approved);
+//
+//            // Complete the task
+//            taskService.complete(taskId, variables);
+//            System.out.println("Task with Name " + task.getName() + " has been completed with status: " + approved);
+//
+//            // Return a success message
+//            return ResponseEntity.status(HttpStatus.OK).body("Task with Name " + task.getName() + " has been successfully completed.");
+//        } else {
+//            // If task is not found, log and return an error message
+//            System.out.println("No task found with the given taskId: " + taskId + " and processInstanceId: " + processInstanceId);
+//
+//            // Return a failure message
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No task found with the given ID or process instance.");
+//        }
+//    }
+
+
+    public void updateReservationStatus(Reservation res, Boolean statut, String decisionSource) {
+        Reservation reservation = reservationRepo.findById(res.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Reservation not found: " + res.getId()));
+
+        String statutLibelle;
+        if ("hotel".equals(decisionSource)) {
+            statutLibelle = (statut != null && statut) ? "CONFIRMÉE" : "ANNULÉE";
+        } else if ("agency".equals(decisionSource) && statut == false) {
+            statutLibelle = "ANNULÉE";
+        } else {
+            return;
+        }
+
+        StatutReservation statutReservation = statutReservationRepo.findByLibelle(statutLibelle)
+                .orElseThrow(() -> new IllegalArgumentException("Statut not found for libelle: " + statutLibelle));
+
+        reservation.setStatut(statutReservation);
+        reservationRepo.save(reservation);
+    }
+
     public ResponseEntity<String> approveOrDisapproveTask(TaskApprovalDTO taskApprovalDTO) {
-        // Extract task details from DTO
         String taskId = taskApprovalDTO.getTaskId();
         String processInstanceId = taskApprovalDTO.getProcessInstanceId();
         Boolean approved = taskApprovalDTO.getApproved();
+        Reservation reservation = (Reservation) taskService.getVariable(taskId, "reservation");
+        Long reservationId = reservation.getId();
 
-        System.out.println("Trying to approve/disapprove task with ID: " + taskId);
+        System.out.println("Processing task with ID: " + taskId);
 
-        // Query the task by taskId and processInstanceId
+        // Query the task
         Task task = taskService.createTaskQuery()
                 .taskId(taskId)
                 .processInstanceId(processInstanceId)
                 .singleResult();
 
-        // Check if task is found
-        if (task != null) {
-            // Prepare task completion variables
-            Map<String, Object> variables = new HashMap<>();
-            variables.put("statut", approved);
+        if (task == null) {
+            System.out.println("No task found with taskId: " + taskId + " and processInstanceId: " + processInstanceId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("No task found with the given ID or process instance.");
+        }
 
-            // Complete the task
-            taskService.complete(taskId, variables);
-            System.out.println("Task with Name " + task.getName() + " has been completed with status: " + approved);
+        String decisionSource = task.getName().equals("Agence manager") ? "agency" : "hotel";
 
-            // Return a success message
-            return ResponseEntity.status(HttpStatus.OK).body("Task with Name " + task.getName() + " has been successfully completed.");
-        } else {
-            // If task is not found, log and return an error message
-            System.out.println("No task found with the given taskId: " + taskId + " and processInstanceId: " + processInstanceId);
+        // Prepare variables for task completion
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("statut", approved);
+        variables.put("decisionSource", decisionSource);
+        variables.put("reservation", reservation);
 
-            // Return a failure message
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No task found with the given ID or process instance.");
+        // Update reservation status
+        Reservation res = reservationRepo.findById(reservationId)
+                .orElseThrow(() -> new IllegalArgumentException("Reservation not found: " + reservationId));
+        updateReservationStatus(res, approved, decisionSource);
+
+        // Complete the current task (Agence manager or Hotel manager)
+        taskService.complete(taskId, variables);
+        System.out.println("Task '" + task.getName() + "' completed with status: " + approved);
+
+        // If this is the Hotel manager's task, handle the send tasks
+        if (decisionSource.equals("hotel")) {
+            // Find and complete the appropriate send task
+            Task sendTask = taskService.createTaskQuery()
+                    .processInstanceId(processInstanceId)
+                    .taskDefinitionKey(approved ? "Activity_09bqe0e" : "Activity_1fmhm53") // IDs from BPMN
+                    .singleResult();
+
+            if (sendTask != null) {
+                sendEmail(reservation, approved); // Send email based on approval status
+                taskService.complete(sendTask.getId()); // Complete the send task
+                System.out.println("Send task '" + sendTask.getName() + "' completed.");
+            } else {
+                System.out.println("Send task not found for process instance: " + processInstanceId);
+            }
+        }
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body("Task '" + task.getName() + "' has been successfully completed.");
+    }
+
+    private void sendEmail(Reservation reservation, Boolean approved) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+            helper.setTo(reservation.getClient().getEmail());
+            helper.setSubject(approved ? "Reservation Confirmed" : "Reservation Rejected");
+            helper.setFrom("no-reply@yourcompany.com");
+
+            String emailBody = approved
+                    ? "Dear Customer,\n\nYour reservation (ID: " + reservation.getId() + ") has been confirmed.\nThank you for choosing us!\n\nBest regards,\nYour Team"
+                    : "Dear Customer,\n\nWe regret to inform you that your reservation (ID: " + reservation.getId() + ") has been rejected.\nFor further assistance, please contact us.\n\nBest regards,\nYour Team";
+            helper.setText(emailBody);
+
+            mailSender.send(message);
+            System.out.println("Email sent to " + reservation.getClient().getEmail() + " with status: " + (approved ? "Confirmed" : "Rejected"));
+        } catch (MessagingException e) {
+            System.err.println("Failed to send email: " + e.getMessage());
         }
     }
 
-
-
-    public void updateReservationStatus(Reservation res, Boolean statut) {
-        // Find the reservation by client ID
-        Reservation reservation = reservationRepo.findById(res.getId()).get();
-
-        if (reservation!=null) {
-            // Get the statut as a string
-            String statutLibelle = statut != null && statut ? "CONFIRMÉE" : "ANNULÉE";
-
-            // Find the StatutReservation by libelle (statut)
-            StatutReservation statutReservation = statutReservationRepo.findByLibelle(statutLibelle)
-                    .orElseThrow(() -> new IllegalArgumentException("Statut not found for libelle: " + statutLibelle));
-
-            // Set the statut in the reservation
-            reservation.setStatut(statutReservation);
-
-            // Save the updated reservation back to the database
-            reservationRepo.save(reservation);
-        }
-    }
 
 }
 

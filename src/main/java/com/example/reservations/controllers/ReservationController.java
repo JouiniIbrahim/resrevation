@@ -166,7 +166,7 @@ public class ReservationController {
     @GetMapping("/tasks")
     public ResponseEntity<List<TaskDTO>> getTasksByProcessDefinitionKey() {
         // Hardcoded process definition key
-        String processDefinitionKey = "Process_1qriv8k";  // Process definition key
+        String processDefinitionKey = "reservation-diagramV2";  // Process definition key
 
         // Retrieve tasks by process definition key
         List<Task> tasks = taskService.createTaskQuery()

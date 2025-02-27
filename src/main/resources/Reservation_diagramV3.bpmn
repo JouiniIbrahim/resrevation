@@ -37,39 +37,31 @@
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_0potdut" sourceRef="Activity_0jufdsr" targetRef="Gateway_1nkvu3q" />
     <bpmn:sequenceFlow id="Flow_0ab12dc" name="Rejection mail" sourceRef="Gateway_1nkvu3q" targetRef="Activity_1fmhm53">
-      <bpmn:extensionElements>
-        <camunda:executionListener class="${ReservationSerImp.sendEmail(reservation, approved)}" event="take" />
-      </bpmn:extensionElements>
+      <bpmn:extensionElements />
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">#{statut==false}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1xw247t" name="Confirmation mail " sourceRef="Gateway_1nkvu3q" targetRef="Activity_09bqe0e">
-      <bpmn:extensionElements>
-        <camunda:executionListener expression="${ReservationSerImp.sendEmail(reservation, approved)}" event="take" />
-      </bpmn:extensionElements>
+      <bpmn:extensionElements />
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">#{statut==true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:endEvent id="Event_0t9td53">
       <bpmn:incoming>Flow_1a7lqso</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_1a7lqso" sourceRef="Activity_1fmhm53" targetRef="Event_0t9td53">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">#{statut==false}</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1a7lqso" sourceRef="Activity_1fmhm53" targetRef="Event_0t9td53" />
     <bpmn:endEvent id="Event_133vuip">
       <bpmn:incoming>Flow_0k1sdtb</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_0k1sdtb" sourceRef="Activity_09bqe0e" targetRef="Event_133vuip">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">#{statut==true}</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
-    <bpmn:sendTask id="Activity_1fmhm53" name="SendRejectionMail">
+    <bpmn:sequenceFlow id="Flow_0k1sdtb" sourceRef="Activity_09bqe0e" targetRef="Event_133vuip" />
+    <bpmn:sendTask id="Activity_1fmhm53" name="SendRejectionMail" camunda:expression="${true}">
       <bpmn:extensionElements>
-        <camunda:executionListener expression="${ReservationSerImp.sendEmail(reservation, approved)}" event="start" />
+        <camunda:executionListener expression="${reservationSerImp.sendEmail(reservation, statut)}" event="start" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0ab12dc</bpmn:incoming>
       <bpmn:outgoing>Flow_1a7lqso</bpmn:outgoing>
     </bpmn:sendTask>
-    <bpmn:sendTask id="Activity_09bqe0e" name="SendConfirmationMail">
+    <bpmn:sendTask id="Activity_09bqe0e" name="SendConfirmationMail" camunda:expression="${true}">
       <bpmn:extensionElements>
-        <camunda:executionListener expression="${ReservationSerImp.sendEmail(reservation, approved)}" event="start" />
+        <camunda:executionListener expression="${reservationSerImp.sendEmail(reservation, statut)}" event="start" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1xw247t</bpmn:incoming>
       <bpmn:outgoing>Flow_0k1sdtb</bpmn:outgoing>

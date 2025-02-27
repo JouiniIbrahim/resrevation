@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 @RequiredArgsConstructor
-@Service
+@Service("reservationSerImp")
 public class ReservationSerImp implements ReservationService {
 
 
@@ -43,7 +43,7 @@ public class ReservationSerImp implements ReservationService {
     private final RuntimeService runtimeService;
 
     private final TaskService taskService;
-
+    @Autowired
     private JavaMailSender mailSender;
 
     /**
@@ -203,7 +203,6 @@ public class ReservationSerImp implements ReservationService {
         String processInstanceId = taskApprovalDTO.getProcessInstanceId();
         Boolean approved = taskApprovalDTO.getApproved();
         Reservation reservation = (Reservation) taskService.getVariable(taskId, "reservation");
-        Long reservationId = reservation.getId();
 
         System.out.println("Processing task with ID: " + taskId);
 
@@ -228,8 +227,8 @@ public class ReservationSerImp implements ReservationService {
         variables.put("reservation", reservation);
 
         // Update reservation status
-        Reservation res = reservationRepo.findById(reservationId)
-                .orElseThrow(() -> new IllegalArgumentException("Reservation not found: " + reservationId));
+        Reservation res = reservationRepo.findById(reservation.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Reservation not found: " + reservation.getId()));
         updateReservationStatus(res, approved, decisionSource);
 
         // Complete the current task (Agence manager or Hotel manager)
@@ -257,22 +256,22 @@ public class ReservationSerImp implements ReservationService {
                 .body("Task '" + task.getName() + "' has been successfully completed.");
     }
 
-    private void sendEmail(Reservation reservation, Boolean approved) {
+    public void sendEmail(Reservation reservation, Boolean statut) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
             helper.setTo(reservation.getClient().getEmail());
-            helper.setSubject(approved ? "Reservation Confirmed" : "Reservation Rejected");
-            helper.setFrom("no-reply@yourcompany.com");
+            helper.setSubject(statut ? "Reservation Confirmed" : "Reservation Rejected");
+            helper.setFrom("no-reply@siga.com");
 
-            String emailBody = approved
-                    ? "Dear Customer,\n\nYour reservation (ID: " + reservation.getId() + ") has been confirmed.\nThank you for choosing us!\n\nBest regards,\nYour Team"
-                    : "Dear Customer,\n\nWe regret to inform you that your reservation (ID: " + reservation.getId() + ") has been rejected.\nFor further assistance, please contact us.\n\nBest regards,\nYour Team";
+            String emailBody = statut
+                    ? "Dear" +reservation.getClient().getNom()+",\n\nYour reservation (ID: " + reservation.getId() + ") has been confirmed.\nThank you for choosing us!\n\nBest regards,\nSIGA"
+                    : "Dear "+reservation.getClient().getNom()+",\n\nWe regret to inform you that your reservation (ID: " + reservation.getId() + ") has been rejected.\nFor further assistance, please contact us.\n\nBest regards,\nSIGA ";
             helper.setText(emailBody);
 
             mailSender.send(message);
-            System.out.println("Email sent to " + reservation.getClient().getEmail() + " with status: " + (approved ? "Confirmed" : "Rejected"));
+            System.out.println("Email sent to " + reservation.getClient().getEmail() + " with status: " + (statut ? "Confirmed" : "Rejected"));
         } catch (MessagingException e) {
             System.err.println("Failed to send email: " + e.getMessage());
         }

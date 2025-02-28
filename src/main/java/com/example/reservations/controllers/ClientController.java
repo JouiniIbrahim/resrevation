@@ -17,6 +17,8 @@ import java.util.Optional;
 @Slf4j
 @RestController
 @RequestMapping("/client")
+@CrossOrigin(origins = "*", maxAge = 3600)
+
 public class ClientController {
 
     @Autowired

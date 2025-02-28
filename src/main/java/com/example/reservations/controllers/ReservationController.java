@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequestMapping("/reservation")
+@CrossOrigin(origins = "*", maxAge = 3600)
+
 public class ReservationController {
 
     @Autowired
@@ -152,7 +154,7 @@ public class ReservationController {
      * This endpoint allows an agency manager to approve or disapprove a task by providing the task details in a TaskApprovalDTO.
      * The task is then processed in the backend and an appropriate response is returned.
      */
-    @PostMapping("/agence_manager")
+    @PostMapping("/agence-manager")
     public ResponseEntity<String> agenceManager(@RequestBody TaskApprovalDTO taskApprovalDTO) {
         // Call the service method to approve or disapprove the task and get the TaskDTO
         return reservationSerImp.approveOrDisapproveTask(taskApprovalDTO);

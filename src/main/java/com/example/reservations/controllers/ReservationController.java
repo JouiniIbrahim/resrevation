@@ -200,7 +200,8 @@ public class ReservationController {
      * It returns the completed tasks as a list of TaskDTO objects.
      */
     @GetMapping("/completed-tasks")
-    public ResponseEntity<List<TaskDTO>> getCompletedTasks() {
+    public ResponseEntity<List<TaskDTO>> getCompletedTasks()
+    {
 
         // Retrieve all completed tasks from the historical table
         List<HistoricTaskInstance> historicTasks = historyService.createHistoricTaskInstanceQuery()

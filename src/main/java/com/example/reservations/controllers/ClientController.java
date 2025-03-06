@@ -18,9 +18,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/client")
 @CrossOrigin(origins = "*", maxAge = 3600)
-
 public class ClientController {
-
     @Autowired
     private ClientSerImp clientSerImp;
 

@@ -18,6 +18,8 @@ import org.camunda.bpm.engine.TaskService;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.camunda.bpm.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -90,9 +92,22 @@ public class ReservationSerImp implements ReservationService {
      * @return A list of all reservation response DTOs.
      */
     @Override
-    public List<ReservationResponseDto> findAll() {
-        // Retrieve all reservations and return them as DTOs
-        return reservationRepo.allReservations();
+    public Page<ReservationResponseDto> findAll(Pageable pageable) {
+        // Fetch paginated reservations from the repository
+        Page<Reservation> reservationPage = reservationRepo.findAll(pageable);
+
+        // Map Reservation entities to ReservationResponseDto
+        return reservationPage.map(reservation -> {
+            ReservationResponseDto dto = new ReservationResponseDto();
+            dto.setId(reservation.getId());
+            dto.setDateDebut(reservation.getDateDebut());
+            dto.setDateFin(reservation.getDateFin());
+            dto.setPrixTotal(reservation.getPrixTotal());
+            dto.setStatutId(reservation.getStatut().getId());
+            dto.setClientid(reservation.getClient().getId());
+            dto.setMessageFr(reservation.getMessageFr());
+            return dto;
+        });
     }
 
     /**

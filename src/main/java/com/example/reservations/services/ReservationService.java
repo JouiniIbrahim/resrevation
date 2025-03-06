@@ -4,6 +4,8 @@ import com.example.reservations.domain.Client;
 import com.example.reservations.dto.ClientDto;
 import com.example.reservations.dto.ReservationDto;
 import com.example.reservations.dto.ReservationResponseDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -13,7 +15,7 @@ public interface ReservationService {
 
     public ReservationDto create(ReservationDto reservationDto);
 
-    public List<ReservationResponseDto> findAll();
+    public Page<ReservationResponseDto> findAll(Pageable pageable);
 
     public List<ReservationResponseDto>
     findReservations(Long statutId, LocalDate startDate, LocalDate endDate);

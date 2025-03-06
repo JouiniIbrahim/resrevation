@@ -5,35 +5,30 @@ import com.example.reservations.dto.*;
 import com.example.reservations.services.implementation.ReservationSerImp;
 import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.HistoryService;
-import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.TaskService;
 import org.camunda.bpm.engine.history.HistoricTaskInstance;
-import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.camunda.bpm.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
 @RequestMapping("/reservation")
 @CrossOrigin(origins = "*", maxAge = 3600)
-
 public class ReservationController {
-
     @Autowired
     private ReservationSerImp reservationSerImp;
     @Autowired
     private HistoryService historyService;
     @Autowired
-    private  TaskService taskService;
+    private TaskService taskService;
 
     /**
      * API to save a new reservation.
@@ -71,17 +66,16 @@ public class ReservationController {
      * If reservations are found, it returns a 200 OK response with the list of reservations.
      */
     @GetMapping("/all")
-    public ResponseEntity<List<ReservationResponseDto>> allReservations() {
-        List<ReservationResponseDto> reservations = reservationSerImp.findAll();
+    public ResponseEntity<Page<ReservationResponseDto>> allReservations(Pageable pageable) {
+        Page<ReservationResponseDto> reservations = reservationSerImp.findAll(pageable);
+
         if (reservations.isEmpty()) {
-            ReservationResponseDto responseDto = new ReservationResponseDto();
-            responseDto.setMessageFr("Aucune réservation trouvée.");
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(reservations); // 204 if no reservations
+            // Return an empty page with a 204 status if no reservations are found
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(reservations);
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body(reservations); // 200 if reservations found
+        return ResponseEntity.status(HttpStatus.OK).body(reservations); // 200 with paginated data
     }
-
     /**
      * API to find reservations by status and period.
      * This endpoint allows filtering reservations based on their status and a specific period.
@@ -200,8 +194,7 @@ public class ReservationController {
      * It returns the completed tasks as a list of TaskDTO objects.
      */
     @GetMapping("/completed-tasks")
-    public ResponseEntity<List<TaskDTO>> getCompletedTasks()
-    {
+    public ResponseEntity<List<TaskDTO>> getCompletedTasks() {
 
         // Retrieve all completed tasks from the historical table
         List<HistoricTaskInstance> historicTasks = historyService.createHistoricTaskInstanceQuery()
@@ -227,6 +220,7 @@ public class ReservationController {
         // Return the completed task details as a response
         return ResponseEntity.status(HttpStatus.OK).body(taskDTOs);
     }
+
     @GetMapping("/completed-tasks-name")
     public ResponseEntity<List<TaskDTO>> getCompletedTasksByName(@RequestParam String taskName) {
 
